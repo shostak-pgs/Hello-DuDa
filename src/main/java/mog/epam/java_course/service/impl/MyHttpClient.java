@@ -20,6 +20,25 @@ import java.io.UnsupportedEncodingException;
  */
 public class MyHttpClient implements Client {
     public static final String URL_STRING = "https://jsonplaceholder.typicode.com/posts";
+    private static MyHttpClient instance;
+    private static CloseableHttpClient client;
+
+    /**
+     * Private constructor for creating single ClosableHttpClient
+     */
+    private MyHttpClient(){
+        client = HttpClientBuilder.create().build();
+    }
+
+    /**
+     * Method returns all the time a single object of MyHttpClient
+     */
+    public static MyHttpClient getInstance(){
+        if(instance == null){
+            instance = new MyHttpClient();
+        }
+        return instance;
+    }
 
     /**
      * Designed to receive publications from the site by the specified publication id
@@ -32,7 +51,7 @@ public class MyHttpClient implements Client {
         String result;
         HttpGet get = new HttpGet(URL_STRING + "/" + articleId);
         CloseableHttpResponse response = null;
-        try (CloseableHttpClient client = HttpClientBuilder.create().build();) {
+        try {
             response = client.execute(get);
             HttpEntity entity = response.getEntity();
             result = EntityUtils.toString(entity);
@@ -53,7 +72,7 @@ public class MyHttpClient implements Client {
     @Override
     public String doPost(String articleId, String params) throws ClientRequestException {
         StringBuilder result = new StringBuilder();
-        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+        try {
             HttpPost post = new HttpPost(URL_STRING);
             post.addHeader("content-type", "application/json");
             post.setEntity(new StringEntity(params));
