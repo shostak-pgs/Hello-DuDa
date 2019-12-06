@@ -37,7 +37,7 @@ public class Controller {
                 if (CLASS.equals("URL")) {
                     stringResponse = new URLClient().doGet(ID);
                 } else if (CLASS.equals("HTTP")) {
-                    stringResponse = new MyHttpClient().doGet(ID);
+                    stringResponse = MyHttpClient.getInstance().doGet(ID);
                 }
                 Response response = new RequestResponseBuilder().buildResponse(stringResponse);
                 Presentation.showGetResponse(response);
@@ -47,7 +47,7 @@ public class Controller {
                 if (CLASS.equals("URL")) {
                     stringResponse = new URLClient().doPost(args[1], request);
                 } else if (CLASS.equals("HTTP")) {
-                    stringResponse = new MyHttpClient().doPost(args[1], request);
+                    stringResponse =  MyHttpClient.getInstance().doPost(args[1], request);
                 }
                 Response response2 = new RequestResponseBuilder().buildResponse(stringResponse);
                 Presentation.showPostResponse(response2);
