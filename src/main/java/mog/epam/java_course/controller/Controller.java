@@ -6,6 +6,8 @@ import mog.epam.java_course.service.ClientRequestException;
 import mog.epam.java_course.service.impl.MyHttpClient;
 import mog.epam.java_course.service.impl.RequestResponseBuilder;
 import mog.epam.java_course.service.impl.URLClient;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  * The program takes three command-line argument and, if the first argument valid,
@@ -31,13 +33,14 @@ public class Controller {
         final String ID = args[1];
         final String CLASS = args[2];
         String stringResponse = null;
-
+      CloseableHttpClient client = HttpClientBuilder.create().build();
+      MyHttpClient httpClient = new MyHttpClient(client);
         switch (METHOD) {
             case ("GET"):
                 if (CLASS.equals("URL")) {
                     stringResponse = new URLClient().doGet(ID);
                 } else if (CLASS.equals("HTTP")) {
-                    stringResponse = MyHttpClient.getInstance().doGet(ID);
+                    stringResponse = httpClient.doGet(ID);
                 }
                 Response response = new RequestResponseBuilder().buildResponse(stringResponse);
                 Presentation.showGetResponse(response);
@@ -47,7 +50,7 @@ public class Controller {
                 if (CLASS.equals("URL")) {
                     stringResponse = new URLClient().doPost(args[1], request);
                 } else if (CLASS.equals("HTTP")) {
-                    stringResponse =  MyHttpClient.getInstance().doPost(args[1], request);
+                    stringResponse =  httpClient.doPost(args[1], request);
                 }
                 Response response2 = new RequestResponseBuilder().buildResponse(stringResponse);
                 Presentation.showPostResponse(response2);

@@ -19,25 +19,11 @@ import java.io.UnsupportedEncodingException;
  * Designed to perform GET and POST requests with apache HttpClient class
  */
 public class MyHttpClient implements Client {
-    public static final String URL_STRING = "https://jsonplaceholder.typicode.com/posts";
-    private static MyHttpClient instance;
-    private static CloseableHttpClient client;
+    private static final String URL_STRING = "https://jsonplaceholder.typicode.com/posts";
+    private CloseableHttpClient client;
 
-    /**
-     * Private constructor for creating single ClosableHttpClient
-     */
-    private MyHttpClient(){
-        client = HttpClientBuilder.create().build();
-    }
-
-    /**
-     * Method returns all the time a single object of MyHttpClient
-     */
-    public static MyHttpClient getInstance(){
-        if(instance == null){
-            instance = new MyHttpClient();
-        }
-        return instance;
+    public MyHttpClient(CloseableHttpClient client){
+        this.client = client;
     }
 
     /**
