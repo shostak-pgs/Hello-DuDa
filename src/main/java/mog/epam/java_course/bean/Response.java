@@ -1,5 +1,9 @@
 package mog.epam.java_course.bean;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import mog.epam.java_course.service.JSONMapperException;
+
+import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -81,4 +85,23 @@ public class Response {
                 ", body='" + body + '\'' +
                 '}';
     }
+     public static class ResponseBuilder{
+         /**
+          * Creates a response object by mapping passed JSON String. Throws a JSONMapperException
+          * if the String have incorrect format
+          * @param str String in JSON format for parsing
+          * @return created response object
+          * @throws JSONMapperException it thrown if the String have incorrect format
+          */
+         public static Response buildResponse(String str) throws JSONMapperException {
+             Response response;
+             ObjectMapper mapper = new ObjectMapper();
+             try {
+                 response = mapper.readValue(str, Response.class);
+             } catch (IOException e) {
+                 throw new JSONMapperException("Wrong response from jsonplaceholder.typicode.com", e);
+             }
+             return response;
+         }
+     }
 }

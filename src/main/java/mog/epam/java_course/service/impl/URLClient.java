@@ -68,9 +68,6 @@ public class URLClient implements Client {
                 try (BufferedReader br = new BufferedReader(new InputStreamReader(urlCon.getInputStream()))) {
                     String str;
                     while ((str = br.readLine()) != null) {
-                        if (str.contains("id")) {
-                            str = "\"id\": \"" + articleId +"\"";
-                        }
                         response.append(str.trim());
                     }
                 }
@@ -80,7 +77,22 @@ public class URLClient implements Client {
         } catch (IOException e) {
             throw new ClientRequestException("File Not Found!", e);
         }
+        return substituteID(response.toString(), articleId);
+    }
 
-        return response.toString();
+    /**
+     * The method is intended to substitute publication id
+     * @param articleId id under which you want to post an article
+     * @return
+     */
+    private String substituteID(String str, String articleId) {
+        String lineWithRightId;
+        Integer currentId = Integer.parseInt(articleId);
+        if (currentId < 100) {
+            currentId = 101;
+        }
+        lineWithRightId = "\"id\": \"" + currentId + "\"";
+        String result = str.replace("\"id\": 101", lineWithRightId);
+        return result;
     }
 }

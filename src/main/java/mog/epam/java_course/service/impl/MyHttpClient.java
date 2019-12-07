@@ -14,16 +14,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Designed to perform GET and POST requests with apache HttpClient class
  */
 public class MyHttpClient implements Client {
-    private static final String URL_STRING = "https://jsonplaceholder.typicode.com/posts";
-    private CloseableHttpClient client;
+    public static final String URL_STRING = "https://jsonplaceholder.typicode.com/posts";
+    private static CloseableHttpClient client;
 
     public MyHttpClient(CloseableHttpClient client){
-        this.client = client;
+         this.client = client;
     }
 
     /**
@@ -33,17 +35,21 @@ public class MyHttpClient implements Client {
      * @throws ClientRequestException thrown if it is unable to connect to the server or such publication does not exist
      */
     @Override
-    public String doGet(String articleId) throws ClientRequestException {
+    public String doGet(String articleId) throws IOException {
         String result;
-        HttpGet get = new HttpGet(URL_STRING + "/" + articleId);
         CloseableHttpResponse response = null;
         try {
-            response = client.execute(get);
+            HttpGet getArticle = new HttpGet(URL_STRING + "/" + articleId);
+            response = client.execute(getArticle);
             HttpEntity entity = response.getEntity();
             result = EntityUtils.toString(entity);
-            response.close();
         } catch (IOException e) {
             throw new ClientRequestException("Server connection Exception!", e);
+        } finally {
+            if(response != null) {
+            response.close();
+        }
+            client.close();
         }
         return result;
     }
@@ -56,29 +62,46 @@ public class MyHttpClient implements Client {
      * @throws ClientRequestException thrown if it is unable to connect to the server or unable to store publication
      */
     @Override
-    public String doPost(String articleId, String params) throws ClientRequestException {
-        StringBuilder result = new StringBuilder();
+    public String doPost(String articleId, String params) throws IOException {
+        String resultWithSubstituteId;
+        CloseableHttpResponse response = null;
         try {
-            HttpPost post = new HttpPost(URL_STRING);
-            post.addHeader("content-type", "application/json");
-            post.setEntity(new StringEntity(params));
-            CloseableHttpResponse response = null;
-            response = client.execute(post);
+            HttpPost postArticle = new HttpPost(URL_STRING);
+            postArticle.addHeader("content-type", "application/json");
+            postArticle.setEntity(new StringEntity(params));
+            response = client.execute(postArticle);
             BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            StringBuilder result = new StringBuilder();
             String str;
             while ((str = reader.readLine()) != null) {
-                if (str.contains("id")) {
-                    str = "\"id\": \"" + articleId +"\"";
-                }
                 result.append(str.trim());
             }
-            response.close();
-        } catch (UnsupportedEncodingException e) {
-            throw new ClientRequestException("Wrong encoding!", e);
+            resultWithSubstituteId = substituteID(result.toString(), articleId);
         } catch (IOException e) {
             throw new ClientRequestException("Server connection Exception!", e);
+        } finally {
+            if(response != null) {
+                response.close();
+            }
+        client.close();
+    }
+        return resultWithSubstituteId;
+    }
+
+    /**
+     * The method is intended to substitute publication id
+     * @param articleId id under which you want to post an article
+     * @return
+     */
+    private String substituteID(String str, String articleId) {
+        String lineWithRightId;
+        Integer currentId = Integer.parseInt(articleId);
+        if (currentId < 100) {
+            currentId = 101;
         }
-        return result.toString();
+        lineWithRightId = "\"id\": \"" + currentId + "\"";
+        String result = str.replace("\"id\": 101", lineWithRightId);
+        return result;
     }
 }
 
