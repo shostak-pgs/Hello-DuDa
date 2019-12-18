@@ -1,5 +1,7 @@
 package mog.epam.java_course.service;
 
+import java.io.IOException;
+
 /**
  * Designed to perform GET and POST requests
  */
@@ -11,7 +13,7 @@ public interface Client {
      * @return String representation of response in JSON format
      * @throws ClientRequestException thrown if it is unable to connect to the server or such publication does not exist
      */
-    public String doGet(String id) throws ClientRequestException;
+    public String doGet(String id) throws IOException;
 
     /**
      * Designed to store information about a new publication by the specified publication id
@@ -20,5 +22,5 @@ public interface Client {
      * @return String representation of response in JSON format
      * @throws ClientRequestException thrown if it is unable to connect to the server or unable to store publication
      */
-    public String doPost(String articleId, String params) throws ClientRequestException;
+    public String doPost(String articleId, String params) throws IOException;
 }

@@ -1,5 +1,11 @@
 package mog.epam.java_course.bean;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import mog.epam.java_course.service.JSONMapperException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Objects;
 
 /**
@@ -68,6 +74,29 @@ public class Request {
                 ", title='" + title + '\'' +
                 ", body='" + body + '\'' +
                 '}';
+    }
+
+    public static class RequestBuilder{
+        /**
+         * Creates a request in JSON String format by creating request object and mapping it to JSON String.
+         * Throws a JSONMapperException if the String have incorrect format
+         * @param title title for request object
+         * @param message message for request object
+         * @param userId userId for request object
+         * @return created response in JSON String format
+         * @throws JSONMapperException it thrown if the request object can't be converted to JSON String
+         */
+        public static String buildRequest(String title, String message, String userId) throws JSONMapperException {
+            OutputStream output = new ByteArrayOutputStream();
+            ObjectMapper objectMapper = new ObjectMapper();
+            Request request = new Request(title, message, userId);
+            try {
+                objectMapper.writeValue(output, request);
+            } catch (IOException e) {
+                throw new JSONMapperException("Wrong request to jsonplaceholder.typicode.com", e);
+            }
+            return output.toString();
+        }
     }
 }
 
