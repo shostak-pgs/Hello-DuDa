@@ -55,6 +55,11 @@
         </init-param>
     </filter>
 
+    <error-page>
+        <error-code>404</error-code>
+        <location>/WEB-INF/view/errors/notFoundError.jsp</location>
+    </error-page>
+
     <filter-mapping>
         <filter-name>CheckButtonFilter</filter-name>
         <url-pattern>/goodsAddServlet</url-pattern>

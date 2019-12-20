@@ -1,21 +1,18 @@
 package app.servlets;
 
-import app.service.GoodsUtil;
+import app.page_path.PagePath;
+import app.entity.Basket;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static app.servlets.TermsCheckServlet.ORDER;
+import static app.servlets.GoodsAddServlet.BASKET;
 
 public class CompletiveServlet extends HttpServlet {
-    private static final String GOOD = "good";
-    private static final String EMPTY_BASKET_PATH = "WEB-INF/view/emptyBasketError.jsp";
-    private static final String PRINT_CHECK_PATH = "/printCheckServlet";
+    private static final String ITEM = "good";
+    private static final String EMPTY_ELEMENT = "--Choose item--";
 
     /**
      * Handles {@link HttpServlet} POST Method. Called if the submit button was clicked.
@@ -28,20 +25,44 @@ public class CompletiveServlet extends HttpServlet {
      */
     @Override
     protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
-        RequestDispatcher requestDispatcher;
 
-        Map<String, Double> orderMap = (HashMap<String, Double>) request.getSession().getAttribute(ORDER);
-        String chosenItem = request.getParameter(GOOD);
+        Basket basket = (Basket) request.getSession().getAttribute(BASKET);
+        String chosenItem = request.getParameter(ITEM);
 
-        if(chosenItem != null) {
-            GoodsUtil.toBasket(chosenItem, orderMap);
+        if(chosenItem != null & !(chosenItem.equals(EMPTY_ELEMENT))) {
+            Basket.getBasket().toBasket(chosenItem);
         }
 
-        if (orderMap.size() == 0) {
-            requestDispatcher = request.getRequestDispatcher(EMPTY_BASKET_PATH);
-        }
-        requestDispatcher = request.getRequestDispatcher(PRINT_CHECK_PATH);
+        PagePath pathForRedirect = getRedirectPath(basket);
+        forwardTo(request, response, pathForRedirect);
 
+    }
+
+    /**
+     * Redirect request by the transferred path
+     * @param request  the {@link HttpServletRequest} contains user name and map for containing order
+     * @param response the {@link HttpServletResponse}
+     * @param path the path for redirection
+     * @throws IOException      thrown when occur exception in redirecting
+     * @throws ServletException thrown when occur exception in redirecting
+     */
+    private void forwardTo(final HttpServletRequest request, final HttpServletResponse response, PagePath path) throws ServletException, IOException {
+        RequestDispatcher requestDispatcher = request.getRequestDispatcher(path.getPath());
         requestDispatcher.forward(request, response);
     }
+
+    /**
+     * Chooses path for redirection by transferred basket's content
+     * @param basket {@link Basket} current basket
+     * @return path to redirect
+     */
+    private PagePath getRedirectPath(Basket basket){
+        int size = basket.getGoods().size();
+        if (size == 0) {
+            return  PagePath.EMPTY_BASKET_ERROR;
+        } else {
+            return PagePath.PRINT_CHECK_PATH;
+        }
+    }
+
 }

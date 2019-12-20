@@ -1,6 +1,7 @@
 package app.servlets;
 
-import app.service.GoodsUtil;
+import app.page_path.PagePath;
+import app.utils.GoodsUtil;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -10,16 +11,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 public class TermsCheckServlet extends HttpServlet {
     private static final String USER_NAME = "name";
     private static final String TERM = "term";
     public static final String ALL_GOODS_LIST = "allGoodsList";
-    public static final String ORDER = "order";
-    private static final String REDIRECT_PATH = "WEB-INF/view/termsError.jsp";
-    private static final String FORWARD_PATH = "WEB-INF/view/firstSelect.jsp";
 
     private Map<String, Double> goodsMap;
 
@@ -39,27 +36,57 @@ public class TermsCheckServlet extends HttpServlet {
     }
 
     /**
-     * Handles {@link HttpServlet} POST Method. Creates an HTML page containing a greeting and
-     * inviting the user to select products. In this method user's name sets as a session attribute
-     * @param request the {@link HttpServletRequest} contains user name as a parameter. User name
+     * Handles {@link HttpServlet} POST Method. Checks if user's terms have been accepted.
+     * If yes, calls user creation, otherwise redirect to the error page
+     * @param request  the {@link HttpServletRequest} contains user name as a parameter. User name
      * transferred from the start(default) HTML page
      * @param response the {@link HttpServletResponse}
-     * @throws IOException thrown when occur exception in redirecting
+     * @throws IOException      thrown when occur exception in redirecting
      * @throws ServletException thrown when occur exception in redirecting
      */
     public void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
 
-        String userName = request.getParameter(USER_NAME);
-        HttpSession session = request.getSession(true);
-        session.setAttribute(USER_NAME, userName);
-
         if (request.getParameter(TERM) == null) {
-            RequestDispatcher requestDispatcher = request.getRequestDispatcher(REDIRECT_PATH);
-            requestDispatcher.forward(request, response);
+            forwardTo(request, response, PagePath.TERMS_ERROR);
+        } else {
+            createUser(request.getSession(true), request.getParameter(USER_NAME));
+            forwardTo(request, response, PagePath.ADD);
         }
-        Map<String, Double> order = new HashMap<>();
-            session.setAttribute(ORDER, order);
-            RequestDispatcher requestDispatcher = request.getRequestDispatcher(FORWARD_PATH);
-            requestDispatcher.forward(request, response);
-        }
+    }
+
+    /**
+     * Handles {@link HttpServlet} GET Method. Redirect user if no goods were chosen after authentication
+     * and order submitting
+     * @param request  the {@link HttpServletRequest} contains user's name and basket as a parameters. User name
+     * transferred from the start(default) HTML page
+     * @param response the {@link HttpServletResponse}
+     * @throws IOException      thrown when occur exception in redirecting
+     * @throws ServletException thrown when occur exception in redirecting
+     */
+    public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+        forwardTo(request, response, PagePath.ADD);
+    }
+
+    /**
+     * Redirect request to the transferred path
+     * @param request  the {@link HttpServletRequest} contains user name and map for containing order
+     * @param response the {@link HttpServletResponse}
+     * @param path the path for redirection
+     * @throws IOException      thrown when occur exception in redirecting
+     * @throws ServletException thrown when occur exception in redirecting
+     */
+    private void forwardTo(final HttpServletRequest request, final HttpServletResponse response, PagePath path) throws ServletException, IOException {
+        RequestDispatcher requestDispatcher = request.getRequestDispatcher(path.getPath());
+        requestDispatcher.forward(request, response);
+    }
+
+    /**
+     * Create a new user setting the name as a session attribute
+     * @param session the user's {@link HttpSession}
+     * @param name user's name
+     */
+    private void createUser(final HttpSession session, final String name) {
+        session.setAttribute(USER_NAME, name);
+    }
+
 }
