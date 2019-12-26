@@ -5,16 +5,16 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-    <bean id="serviceProvider" class="app.service.ServiceProvider">
+    <bean id="serviceProvider" class="app.service.ServiceProvider" lazy-init="true">
     </bean>
 
-    <bean id="userService" class="app.service.impl.UserService">
+    <bean id="userService" class="app.service.impl.UserService" lazy-init="true">
     </bean>
 
-    <bean id="orderService" class="app.service.impl.OrderService">
+    <bean id="orderService" class="app.service.impl.OrderService" lazy-init="true">
     </bean>
 
-    <bean id="orderGoodsService" class="app.service.impl.OrderGoodsServiceImpl">
+    <bean id="orderGoodsService" class="app.service.impl.OrderGoodsServiceImpl" lazy-init="true">
     </bean>
 
 </beans>
