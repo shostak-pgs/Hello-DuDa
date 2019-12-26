@@ -1,18 +1,23 @@
 package app.servlets;
 
 import app.entity.Basket;
+import app.entity.Good;
+import app.service.ServiceProvider;
+import app.service.impl.OrderService;
 import app.utils.GoodsUtil;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Map;
-import static app.servlets.GoodsAddServlet.BASKET;
+
+import static app.servlets.CreateUserServlet.USER_ID;
+import static app.servlets.GoodsAddServlet.ORDER_ID;
 
 public class PrintCheckServlet extends HttpServlet {
     private static final String USER_NAME = "name";
-    Basket basket;
 
     /**
      * Handles {@link HttpServlet} POST Method. Creates an HTML page containing the completed order and its
@@ -25,7 +30,7 @@ public class PrintCheckServlet extends HttpServlet {
     protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         String userName = (String) request.getSession().getAttribute(USER_NAME);
         PrintWriter writer = response.getWriter();
-        basket = (Basket) request.getSession().getAttribute(BASKET);
+
         writer.println(
                 "<!DOCTYPE html>"
                         + " <html lang=\"en\">"
@@ -56,24 +61,34 @@ public class PrintCheckServlet extends HttpServlet {
                         + "       <h3>Dear " + userName + ", your order:</h3>"
                         + "     </div>"
                         + "     <div id=\"formStyle\"> ");
+
+        Long orderId = (Long)request.getSession().getAttribute(ORDER_ID);
+        Map<String, Integer> orderedGoodsMap = ServiceProvider.getInstance().getOrderGoodsService().getOrderedGoods(orderId);
         int i = 1;
-        for (Map.Entry<String, Integer> pair : basket.getGoods().entrySet()) {
+        for (Map.Entry<String, Integer> pair : orderedGoodsMap.entrySet()) {
             writer.printf("<p>%d) %s x %d</p>\n", i, pair.getKey(), pair.getValue());
             i += 1;
         }
-        writer.printf("<p>Total: $ %.2f </p>\n", + GoodsUtil.countTotalPrice(basket));
+
+        List<Good> orderedGoods = ServiceProvider.getInstance().getOrderGoodsService().getGoods(orderId);
+        double orderPrice = GoodsUtil.countTotalPrice(orderedGoods);
+        writer.printf("<p>Total: $ %.2f </p>\n", + orderPrice);
 
         writer.println(
                         "    </div>"
                         + "   </body>"
                         + " </html>");
+
+        OrderService service = (OrderService)ServiceProvider.getInstance().getOrderService();
+        service.updateByUserId(orderPrice, (long)request.getSession().getAttribute(USER_ID));
+        clearBasket();
     }
 
     /**
-    * Method clean the basket after printing the check
-    */
-    @Override
-    public void destroy(){
-        basket = null;
+     * Clears basket when the order is finished
+     */
+    private void clearBasket(){
+         Basket.getBasket().clear();
     }
+
 }

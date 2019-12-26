@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <bean id="daoProvider" class="app.dao.DAOProvider">
+    </bean>
+
+    <bean id="serviceProvider" class="app.service.ServiceProvider">
+    </bean>
+
+    <bean id="userService" class="app.service.impl.UserService">
+    </bean>
+
+    <bean id="orderService" class="app.service.impl.OrderService">
+    </bean>
+
+    <bean id="orderGoodsService" class="app.service.impl.OrderGoodsServiceImpl">
+    </bean>
+
+</beans>

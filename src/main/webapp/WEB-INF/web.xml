@@ -4,31 +4,13 @@
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
          version="4.0">
 
-    <context-param>
-        <param-name>Head First</param-name>
-        <param-value>5</param-value>
-    </context-param>
-    <context-param>
-        <param-name>Mazda6 tutorial</param-name>
-        <param-value>4</param-value>
-    </context-param>
-    <context-param>
-        <param-name>The Lord of the Rings</param-name>
-        <param-value>3.5</param-value>
-    </context-param>
-    <context-param>
-        <param-name>Children Stories</param-name>
-        <param-value>2</param-value>
-    </context-param>
-
     <session-config>
         <session-timeout>15</session-timeout> <!-- in minutes -->
     </session-config>
 
-
     <servlet>
-        <servlet-name>termsCheckServlet</servlet-name>
-        <servlet-class>app.servlets.TermsCheckServlet</servlet-class>
+        <servlet-name>CreateUserServlet</servlet-name>
+        <servlet-class>app.servlets.CreateUserServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -47,6 +29,15 @@
     </servlet>
 
     <filter>
+        <filter-name>TermsCheckFilter</filter-name>
+        <filter-class>app.filters.TermsCheckFilter</filter-class>
+        <init-param>
+            <param-name>LogFileName</param-name>
+            <param-value>UserLog.txt</param-value>
+        </init-param>
+    </filter>
+
+    <filter>
         <filter-name>CheckButtonFilter</filter-name>
         <filter-class>app.filters.CheckButtonFilter</filter-class>
         <init-param>
@@ -61,6 +52,12 @@
     </error-page>
 
     <filter-mapping>
+        <filter-name>TermsCheckFilter</filter-name>
+        <url-pattern>/createUserServlet</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+
+    <filter-mapping>
         <filter-name>CheckButtonFilter</filter-name>
         <url-pattern>/goodsAddServlet</url-pattern>
         <url-pattern>/complete</url-pattern>
@@ -68,8 +65,8 @@
     </filter-mapping>
 
     <servlet-mapping>
-        <servlet-name>termsCheckServlet</servlet-name>
-        <url-pattern>/termsCheckServlet</url-pattern>
+        <servlet-name>CreateUserServlet</servlet-name>
+        <url-pattern>/createUserServlet</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

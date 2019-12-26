@@ -20,7 +20,7 @@ public class CompletiveServlet extends HttpServlet {
      * If no products have been selected, a warning page is displayed.
      * @param request  the {@link HttpServletRequest} may contain the last selected item
      * @param response the {@link HttpServletResponse}
-     * @throws IOException thrown when occur exception in redirecting
+     * @throws IOException      thrown when occur exception in redirecting
      * @throws ServletException thrown when occur exception in redirecting
      */
     @Override
@@ -29,20 +29,19 @@ public class CompletiveServlet extends HttpServlet {
         Basket basket = (Basket) request.getSession().getAttribute(BASKET);
         String chosenItem = request.getParameter(ITEM);
 
-        if(chosenItem != null & !(chosenItem.equals(EMPTY_ELEMENT))) {
+        if (!chosenItem.equals(EMPTY_ELEMENT)) {
             Basket.getBasket().toBasket(chosenItem);
         }
 
         PagePath pathForRedirect = getRedirectPath(basket);
         forwardTo(request, response, pathForRedirect);
-
     }
 
     /**
      * Redirect request by the transferred path
      * @param request  the {@link HttpServletRequest} contains user name and map for containing order
      * @param response the {@link HttpServletResponse}
-     * @param path the path for redirection
+     * @param path     the path for redirection
      * @throws IOException      thrown when occur exception in redirecting
      * @throws ServletException thrown when occur exception in redirecting
      */
@@ -56,12 +55,16 @@ public class CompletiveServlet extends HttpServlet {
      * @param basket {@link Basket} current basket
      * @return path to redirect
      */
-    private PagePath getRedirectPath(Basket basket){
-        int size = basket.getGoods().size();
-        if (size == 0) {
-            return  PagePath.EMPTY_BASKET_ERROR;
+    private PagePath getRedirectPath(Basket basket) {
+        if (basket == null) {
+            return PagePath.EMPTY_BASKET_ERROR;
         } else {
-            return PagePath.PRINT_CHECK_PATH;
+            int size = basket.getGoods().size();
+            if (size == 0) {
+                return PagePath.EMPTY_BASKET_ERROR;
+            } else {
+                return PagePath.PRINT_CHECK;
+            }
         }
     }
 
