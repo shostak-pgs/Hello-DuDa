@@ -14,8 +14,8 @@ public class DAOProvider {
 
     static Connection connection;
 
-    static ApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
-    public static final DAOProvider instance = (DAOProvider) context.getBean("daoProvider");
+ 
+    public static final DAOProvider instance = new DAOProvider();
 
     /**
      * Return the single provider object
