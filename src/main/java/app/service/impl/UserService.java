@@ -1,18 +1,15 @@
 package app.service.impl;
 
-import app.dao.DAOProvider;
 import app.dao.UserDao;
 import app.entity.User;
-import app.service.Service;
 
 import java.sql.SQLException;
 
-public class UserService implements Service {
-    UserDao userDao;
-    User user;
+public class UserService {
+    private final UserDao userDao;
 
-    public UserService() {
-        userDao = DAOProvider.getInstance().getUserDao();
+    public UserService(UserDao userDao) {
+        this.userDao = userDao;
     }
 
     /**
@@ -20,9 +17,8 @@ public class UserService implements Service {
      * @param name user's name
      * @return the User
      */
-    @Override
     public Object get(String name) {
-
+        User user = null;
         if (!isExist(name)) {
             user = create(name);
         }
@@ -36,7 +32,7 @@ public class UserService implements Service {
      */
     private boolean isExist(String name) {
         boolean isPresent = true;
-
+        User user = null;
         try {
             user = userDao.getUserByName(name);
             if (user == null) {
@@ -55,7 +51,6 @@ public class UserService implements Service {
      */
     private User create(String name) {
         User user = null;
-
         try {
             userDao.addUser(name, name);
             user = userDao.getUserByName(name);

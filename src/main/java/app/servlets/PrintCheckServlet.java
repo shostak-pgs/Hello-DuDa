@@ -2,7 +2,7 @@ package app.servlets;
 
 import app.entity.Basket;
 import app.entity.Good;
-import app.service.ServiceProvider;
+import app.service.ContextUtil;
 import app.service.impl.OrderService;
 import app.utils.GoodsUtil;
 import javax.servlet.http.HttpServlet;
@@ -63,25 +63,25 @@ public class PrintCheckServlet extends HttpServlet {
                         + "     <div id=\"formStyle\"> ");
 
         Long orderId = (Long)request.getSession().getAttribute(ORDER_ID);
-        Map<String, Integer> orderedGoodsMap = ServiceProvider.getInstance().getOrderGoodsService().getOrderedGoods(orderId);
-        int i = 1;
-        for (Map.Entry<String, Integer> pair : orderedGoodsMap.entrySet()) {
-            writer.printf("<p>%d) %s x %d</p>\n", i, pair.getKey(), pair.getValue());
-            i += 1;
-        }
-
-        List<Good> orderedGoods = ServiceProvider.getInstance().getOrderGoodsService().getGoods(orderId);
-        double orderPrice = GoodsUtil.countTotalPrice(orderedGoods);
-        writer.printf("<p>Total: $ %.2f </p>\n", + orderPrice);
-
-        writer.println(
-                        "    </div>"
-                        + "   </body>"
-                        + " </html>");
-
-        OrderService service = (OrderService)ServiceProvider.getInstance().getOrderService();
-        service.updateByUserId(orderPrice, (long)request.getSession().getAttribute(USER_ID));
-        clearBasket();
+//        Map<String, Integer> orderedGoodsMap = ContextUtil.getInstance().getOrderGoodsService().getOrderedGoods(orderId);
+//        int i = 1;
+//        for (Map.Entry<String, Integer> pair : orderedGoodsMap.entrySet()) {
+//            writer.printf("<p>%d) %s x %d</p>\n", i, pair.getKey(), pair.getValue());
+//            i += 1;
+//        }
+//
+//        List<Good> orderedGoods = ContextUtil.getInstance().getOrderGoodsService().getGoods(orderId);
+//        double orderPrice = GoodsUtil.countTotalPrice(orderedGoods);
+//        writer.printf("<p>Total: $ %.2f </p>\n", + orderPrice);
+//
+//        writer.println(
+//                        "    </div>"
+//                        + "   </body>"
+//                        + " </html>");
+//
+//        OrderService service = (OrderService) ContextUtil.getInstance().getOrderService();
+//        service.updateByUserId(orderPrice, (long)request.getSession().getAttribute(USER_ID));
+//        clearBasket();
     }
 
     /**

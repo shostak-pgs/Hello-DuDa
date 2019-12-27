@@ -1,12 +1,11 @@
 package app.servlets;
 
-import app.dao.DAOProvider;
 import app.entity.Basket;
 import app.entity.Good;
 import app.entity.Order;
 import app.entity.User;
 import app.page_path.PagePath;
-import app.service.ServiceProvider;
+import app.service.ContextUtil;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -39,11 +38,11 @@ public class CreateUserServlet extends HttpServlet {
     public void init(final ServletConfig config) throws ServletException {
         ServletContext servletContext = config.getServletContext();
 
-        try {
-            allGoodsList = DAOProvider.getInstance().getGoodDao().getAllGoods();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            allGoodsList = DAOProvider.getInstance().getGoodDao().getAllGoods();
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
 
         servletContext.setAttribute(ALL_GOODS_LIST, allGoodsList);
         super.init(config);
@@ -89,12 +88,12 @@ public class CreateUserServlet extends HttpServlet {
      * @param name user's name
      */
     private void authorizeUser(final HttpSession session, String name){
-        User user = (User)ServiceProvider.getInstance().getUserService().get(name);
-        Order order = (Order)ServiceProvider.getInstance().getOrderService().get(String.valueOf(user.getId()));
-
-        session.setAttribute(USER_NAME, user.getLogin());
-        session.setAttribute(USER_ID, user.getId());
-        session.setAttribute(BASKET, Basket.getBasket(order.getId()));
-        session.setAttribute(ORDER_ID, order.getId());
+//        User user = (User) ContextUtil.getUserService().get(name);
+//        Order order = (Order) ContextUtil.getInstance().getOrderService().get(String.valueOf(user.getId()));
+//
+//        session.setAttribute(USER_NAME, user.getLogin());
+//        session.setAttribute(USER_ID, user.getId());
+//        session.setAttribute(BASKET, Basket.getBasket(order.getId()));
+//        session.setAttribute(ORDER_ID, order.getId());
     }
 }

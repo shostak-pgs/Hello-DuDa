@@ -1,6 +1,6 @@
 package app.entity;
 
-import app.service.ServiceProvider;
+import app.service.ContextUtil;
 import java.util.Map;
 
 public class Basket {
@@ -11,7 +11,7 @@ public class Basket {
 
     private Basket(Long orderId) {
         this.orderId = orderId;
-        basket = ServiceProvider.getInstance().getOrderGoodsService().getOrderedGoods(orderId);
+        basket = ContextUtil.getInstance().getOrderGoodsService().getOrderedGoods(orderId);
     }
 
     /**
@@ -37,8 +37,8 @@ public class Basket {
      * @param item to add
      */
     public void toBasket(String item) {
-        ServiceProvider.getInstance().getOrderGoodsService().add(item, orderId);
-        basket = ServiceProvider.getInstance().getOrderGoodsService().getOrderedGoods(orderId);
+        ContextUtil.getInstance().getOrderGoodsService().add(item, orderId);
+        basket = ContextUtil.getInstance().getOrderGoodsService().getOrderedGoods(orderId);
     }
 
     /**

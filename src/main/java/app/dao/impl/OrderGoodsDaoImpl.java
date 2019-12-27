@@ -8,15 +8,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.sql.DataSource;
 
 public class OrderGoodsDaoImpl implements OrderGoodsDao {
     private static final String SELECT_ORDER_GOOD_BY_ORDER_ID_SQL_STATEMENT = "SELECT * FROM OrderGoods WHERE orderId LIKE ?";
     private static final String INSERT_ORDER_GOOD_SQL_STATEMENT = "INSERT INTO OrderGoods (orderId, goodId) VALUES (?,?)";
 
-    private Connection connection;
+    private final DataSource dataSource;
 
-    public OrderGoodsDaoImpl(Connection connection) {
-        this.connection = connection;
+    public OrderGoodsDaoImpl(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     /**
@@ -27,12 +28,12 @@ public class OrderGoodsDaoImpl implements OrderGoodsDao {
      */
     @Override
     public List<OrderGoods> getByOrderId(Long orderId) throws SQLException {
-        List<OrderGoods> list = new ArrayList<>();////
-        try (PreparedStatement st = connection.prepareStatement(SELECT_ORDER_GOOD_BY_ORDER_ID_SQL_STATEMENT)){
+        List<OrderGoods> list = new ArrayList<>();
+        try (PreparedStatement st = dataSource.getConnection().prepareStatement(SELECT_ORDER_GOOD_BY_ORDER_ID_SQL_STATEMENT)){
             st.setLong(1, orderId);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
-                list.add(new OrderGoods(rs.getLong("id"), rs.getLong("orderId"), rs.getLong("goodId")));////
+                list.add(new OrderGoods(rs.getLong("id"), rs.getLong("orderId"), rs.getLong("goodId")));
             }
         }
         return list;
@@ -47,7 +48,7 @@ public class OrderGoodsDaoImpl implements OrderGoodsDao {
      */
     @Override
     public void addToOrderGood(Long orderId, Long goodId) throws SQLException {
-        try (PreparedStatement st = connection.prepareStatement(INSERT_ORDER_GOOD_SQL_STATEMENT)) {
+        try (PreparedStatement st = dataSource.getConnection().prepareStatement(INSERT_ORDER_GOOD_SQL_STATEMENT)) {
             st.setLong(1, orderId);
             st.setLong(2, goodId);
             st.executeUpdate();

@@ -1,6 +1,7 @@
 package app.service.impl;
 
-import app.dao.DAOProvider;
+import app.dao.GoodDao;
+import app.dao.OrderGoodsDao;
 import app.entity.Good;
 import app.entity.OrderGoods;
 import app.service.OrderGoodsService;
@@ -12,7 +13,13 @@ import java.util.List;
 import java.util.Map;
 
 public class OrderGoodsServiceImpl implements OrderGoodsService {
-    DAOProvider dao = DAOProvider.getInstance();
+    private final OrderGoodsDao orderGoodsDao;
+    private final GoodDao goodDao;
+
+    public OrderGoodsServiceImpl(OrderGoodsDao orderGoodsDao, GoodDao goodDao) {
+        this.orderGoodsDao = orderGoodsDao;
+        this.goodDao = goodDao;
+    }
 
     /**
      * Added product by name to the OrderGoods db table
@@ -22,8 +29,8 @@ public class OrderGoodsServiceImpl implements OrderGoodsService {
     @Override
     public void add(String name, Long orderId) {
         try {
-            Good good = DAOProvider.getInstance().getGoodDao().getGood(GoodsUtil.getName(name));
-            dao.getOrderGoodsDao().addToOrderGood(orderId, good.getId());
+            Good good = goodDao.getGood(GoodsUtil.getName(name));
+            orderGoodsDao.addToOrderGood(orderId, good.getId());
         } catch (SQLException e) {
             System.out.println("Exception with basket. Try again later");
         }
@@ -36,7 +43,7 @@ public class OrderGoodsServiceImpl implements OrderGoodsService {
      */
     @Override
     public Map<String, Integer> getOrderedGoods(Long orderId) {
-        Map<String, Integer> map = new HashMap<>();////
+        Map<String, Integer> map = new HashMap<>();
         List<Good> orderedGoods = getGoods(orderId);
         for(Good good : orderedGoods) {
             String item = (good.getName() + " (" + good.getPrice() + " $)");
@@ -56,12 +63,12 @@ public class OrderGoodsServiceImpl implements OrderGoodsService {
      * @return the list
      */
   public List<Good> getGoods(Long orderId) {
-      List<Good> orderedGoods = new ArrayList<>();////
+      List<Good> orderedGoods = new ArrayList<>();
       try {
-          List<OrderGoods> inCurrentOrder = DAOProvider.getInstance().getOrderGoodsDao().getByOrderId(orderId);
+          List<OrderGoods> inCurrentOrder = orderGoodsDao.getByOrderId(orderId);
 
           for (OrderGoods current : inCurrentOrder) {
-              orderedGoods.add(DAOProvider.getInstance().getGoodDao().getGood(current.getGoodId()));
+              orderedGoods.add(goodDao.getGood(current.getGoodId()));
           }
       } catch (SQLException e) {
           e.printStackTrace();

@@ -1,18 +1,14 @@
 package app.service.impl;
 
-import app.dao.DAOProvider;
 import app.dao.OrderDao;
 import app.entity.Order;
-import app.service.Service;
 import java.sql.SQLException;
 
-public class OrderService implements Service {
+public class OrderService {
+    private final OrderDao orderDao;
 
-    OrderDao orderDao;
-    Order order;
-
-    public OrderService() {
-        orderDao = DAOProvider.getInstance().getOrderDao();
+    public OrderService(OrderDao orderDao) {
+        this.orderDao = orderDao;
     }
 
     /**
@@ -20,8 +16,8 @@ public class OrderService implements Service {
      * @param stringId user's id
      * @return the Order
      */
-    @Override
     public Object get(String stringId) {
+        Order order = null;
         Long id = Long.parseLong(stringId);
         if (!isExist(id)) {
             order = create(id);
@@ -36,7 +32,7 @@ public class OrderService implements Service {
      */
     private boolean isExist(Long id) {
         boolean isPresent = true;
-
+        Order order = null;
         try {
             order = orderDao.getOrderByUserId(id);
             if (order == null) {
@@ -70,7 +66,6 @@ public class OrderService implements Service {
      * Clears basket when the order is finished
      */
     public void updateByUserId(double orderPrice, Long orderId) {
-        OrderDao dao =  DAOProvider.getInstance().getOrderDao();
-        dao.updateOrderById(orderPrice, orderId);
+        orderDao.updateOrderById(orderPrice, orderId);
     }
 }

@@ -6,16 +6,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import javax.sql.DataSource;
 
 public class OrderDaoImpl implements OrderDao {
     private static final String SELECT_ORDER_BY_USER_SQL_STATEMENT = "SELECT * FROM Orders WHERE userId = ?";
     private static final String INSERT_ORDER_SQL_STATEMENT = "INSERT INTO Orders (userId) VALUES (?)";
     private static final String UPDATE_ORDER_SQL_STATEMENT = "UPDATE Orders SET totalPrice = ? WHERE userId = ?";
 
-    private Connection connection;
+    private final DataSource dataSource;
 
-    public OrderDaoImpl(Connection connection) {
-        this.connection = connection;
+    public OrderDaoImpl(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     /**
@@ -28,11 +29,11 @@ public class OrderDaoImpl implements OrderDao {
     @Override
     public Order getOrderByUserId(Long id) throws SQLException {
         Order order = null;
-        try (PreparedStatement st = connection.prepareStatement(SELECT_ORDER_BY_USER_SQL_STATEMENT)) {
+        try (PreparedStatement st = dataSource.getConnection().prepareStatement(SELECT_ORDER_BY_USER_SQL_STATEMENT)) {
             st.setLong(1, id);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
-                order = new Order(rs.getLong("id"), rs.getLong("userId"), rs.getDouble("totalPrice"));////
+                order = new Order(rs.getLong("id"), rs.getLong("userId"), rs.getDouble("totalPrice"));
             }
         }
         return order;
@@ -46,7 +47,7 @@ public class OrderDaoImpl implements OrderDao {
      */
     @Override
     public void addToOrder(Long userId) throws SQLException {
-        try (PreparedStatement st = connection.prepareStatement(INSERT_ORDER_SQL_STATEMENT)) {
+        try (PreparedStatement st = dataSource.getConnection().prepareStatement(INSERT_ORDER_SQL_STATEMENT)) {
             st.setLong(1, userId);
             st.executeUpdate();
         }
@@ -59,7 +60,7 @@ public class OrderDaoImpl implements OrderDao {
      */
     @Override
     public void updateOrderById(double totalPrice, long userId) {
-        try (PreparedStatement st = connection.prepareStatement(UPDATE_ORDER_SQL_STATEMENT)) {
+        try (PreparedStatement st = dataSource.getConnection().prepareStatement(UPDATE_ORDER_SQL_STATEMENT)) {
             st.setDouble(1, totalPrice);
             st.setLong(2, userId);
         } catch (SQLException e){
