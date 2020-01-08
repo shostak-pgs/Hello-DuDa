@@ -1,38 +1,51 @@
 package app.entity;
 
-import java.util.HashMap;
+import app.service.ContextUtil;
 import java.util.Map;
 
 public class Basket {
 
     private Map<String, Integer> basket;
     private static Basket instance;
+    private Long orderId;
 
-    private Basket() {
-        basket = new HashMap<>();
+    private Basket(Long orderId) {
+        this.orderId = orderId;
+        basket = ContextUtil.getInstance().getOrderGoodsService().getOrderedGoods(orderId);
+    }
+
+    /**
+     * @return the basket of current user
+    */
+    public static Basket getBasket() {
+        return instance;
     }
 
     /**
      * @return the basket of current user. Is the basket is empty, creates new basket
+     * @param orderId order for basket creation
      */
-    public static Basket getBasket() {
+    public static Basket getBasket(Long orderId) {
         if (instance == null) {
-            instance = new Basket();
+           instance = new Basket(orderId);
         }
         return instance;
     }
 
     /**
-     * Adds the selected item to the basket
-     * @param item chosen product
+     * Added chosen item to basket
+     * @param item to add
      */
     public void toBasket(String item) {
-        int value = 1;
-        if (basket.containsKey(item)) {
-            value = basket.get(item) + 1;
-            basket.remove(item);
-        }
-        basket.put(item, value);
+        ContextUtil.getInstance().getOrderGoodsService().add(item, orderId);
+        basket = ContextUtil.getInstance().getOrderGoodsService().getOrderedGoods(orderId);
+    }
+
+    /**
+     * Used for clearing the basket
+     */
+    public void clear(){
+        instance = null;
     }
 
     /**

@@ -1,62 +1,41 @@
 package app.utils;
 
-import app.entity.Basket;
-import javax.servlet.ServletContext;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import app.entity.Good;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class GoodsUtil {
 
     /**
-     * Rreturn the price of the transferred item.
+     * Return the name of the transferred item.
      * @param item String representation of item position, contains name and price like"The Lord of the Rings (3.5 $)"
-     * @return the price of item
+     * @return the name of item
      */
-    private static double getPrice(String item) {
+    public static String getName(String item) {
         if(item == null) {
-            throw new NullPointerException("One argument is null! Check out web.xml parameters!");
+            throw new NullPointerException("Argument is null! Check out parameters!");
         }
-        Pattern pricePattern = Pattern.compile("\\(([0-9]+\\.[0-9]+)\\s\\$\\)");
-        Matcher matcher = pricePattern.matcher(item);
-        double price = 0.0;
+        Pattern namePattern = Pattern.compile("(.+)\\s\\(([0-9]+\\.[0-9]+)\\s\\$\\)");
+        Matcher matcher = namePattern.matcher(item);
+        String result = "";
         while (matcher.find()) {
-            price = Double.parseDouble(matcher.group(1));
+            result = matcher.group(1);
         }
-        return price;
-    }
-
-    /**
-     * The method creates a {@link Map} for storing the list of goods and their prices
-     * in a key-value format. The list is built from the {@link ServletContext} object passed to the method
-     * @param servletContext ServletContext object in which the necessary data is stored
-     * @return the list of goods and their prices storied in map
-     */
-    public static Map<String, Double> buildGoodsMap(final ServletContext servletContext) {
-        Map<String, Double> goodsMap = new HashMap<>();
-        Enumeration<java.lang.String> goods = servletContext.getInitParameterNames();
-        while (goods.hasMoreElements()) {
-            String name = goods.nextElement();
-            goodsMap.put(name, Double.parseDouble(servletContext.getInitParameter(name)));
-        }
-        return goodsMap;
+        return result;
     }
 
     /**
      * Calculates the amount of the completed order
-     * @param basket {@link Map} contains chosen goods
+     * @param orderedGoods {@link List} contains chosen goods
      * @return calculated price
      */
-    public static double countTotalPrice(Basket basket) {
-        double totalPrice = 0.0;
-        Map<String, Integer> order = basket.getGoods();
-        double cost;
-        for (Map.Entry<String, Integer> pair : order.entrySet()) {
-            cost = getPrice(pair.getKey()) * pair.getValue();
-            totalPrice += cost;
+    public static double countTotalPrice(List<Good> orderedGoods) {
+        double orderPrice = 0.0;
+
+        for(Good good : orderedGoods) {
+            orderPrice = orderPrice + good.getPrice();
         }
-        return totalPrice;
+        return orderPrice;
     }
 }

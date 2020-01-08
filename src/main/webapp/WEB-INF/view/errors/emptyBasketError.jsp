@@ -35,7 +35,7 @@
 <div id="form">
     <p>You didn't choose anything</p>
     <p>Click to the link to follow the select page</p>
-    <p><a href="termsCheckServlet">Goods select page</a></p>
+    <p><a href="goodsAddServlet">Goods select page</a></p>
 </div>
 </body>
 </html>

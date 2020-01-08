@@ -5,8 +5,9 @@ package app.page_path;
  */
 public enum PagePath {
     ADD("WEB-INF/view/addItem.jsp"),
-    PRINT_CHECK_PATH("/printCheckServlet"),
+    PRINT_CHECK("/printCheckServlet"),
     TERMS_ERROR("WEB-INF/view/errors/termsError.jsp"),
+    COMPLETIVE_SERVLET("/complete"),
     EMPTY_BASKET_ERROR("WEB-INF/view/errors/emptyBasketError.jsp");
 
     private final String path;

@@ -12,6 +12,7 @@ import java.io.IOException;
 public class GoodsAddServlet extends HttpServlet {
     private static final String ITEM = "good";
     private static final String EMPTY_ELEMENT = "--Choose item--";
+    public static final String ORDER_ID = "Order id";
     public static final String BASKET = "order";
 
     /**
@@ -26,22 +27,33 @@ public class GoodsAddServlet extends HttpServlet {
     @Override
     protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
         String chosenItem = request.getParameter(ITEM);
-        request.getSession().setAttribute(BASKET, Basket.getBasket());
 
         putToBasket(chosenItem);
-        forwardTo(request, response, PagePath.ADD);
+        forwardTo(request, response);
+    }
+
+    /**
+     * Handles {@link HttpServlet} GET Method. Redirect user if no goods were chosen after authentication
+     * and order submitting
+     * @param request  the {@link HttpServletRequest} contains user's name and basket as a parameters. User name
+     * transferred from the start(default) HTML page
+     * @param response the {@link HttpServletResponse}
+     * @throws IOException      thrown when occur exception in redirecting
+     * @throws ServletException thrown when occur exception in redirecting
+     */
+    public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+        forwardTo(request, response);
     }
 
     /**
      * Redirect request to the transferred path
      * @param request  the {@link HttpServletRequest} contains user name and map for containing order
      * @param response the {@link HttpServletResponse}
-     * @param path     the path for redirection
      * @throws IOException      thrown when occur exception in redirecting
      * @throws ServletException thrown when occur exception in redirecting
      */
-    private void forwardTo(final HttpServletRequest request, final HttpServletResponse response, PagePath path) throws ServletException, IOException {
-        RequestDispatcher requestDispatcher = request.getRequestDispatcher(path.getPath());
+    private void forwardTo(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+        RequestDispatcher requestDispatcher = request.getRequestDispatcher(PagePath.ADD.getPath());
         requestDispatcher.forward(request, response);
     }
 
@@ -50,7 +62,7 @@ public class GoodsAddServlet extends HttpServlet {
      * @param chosenItem item for adding
      */
     public void putToBasket(final String chosenItem) {
-        if (!(chosenItem == null | (chosenItem.equals(EMPTY_ELEMENT)))) {
+        if (!chosenItem.equals(EMPTY_ELEMENT)) {
             Basket.getBasket().toBasket(chosenItem);
         }
     }

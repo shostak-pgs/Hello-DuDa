@@ -41,25 +41,27 @@
     <!-We print it if order contains goods-!>
     <c:if test="${not empty orderList}">
         <p>You have already chosen:</p>
-        <c:forEach items="${orderList}" var="pair">
-            <p>${pair['key']} x ${pair['value']}</p>
-        </c:forEach>
     </c:if>
+    <c:forEach items="${orderList}" var="pair">
+        <p>${pair['key']} x ${pair['value']}</p>
+    </c:forEach>
 
     <form action="goodsAddServlet" method="post">
         <select name="good">
             <c:set var="allGoodsMap" scope="session" value="${allGoodsList}"/>
             <option>--Choose item--</option>
             <c:forEach items="${allGoodsMap}" var="entry">
-                <option>${entry['key']} (${entry['value']} $)</option>
+                <option>${entry.getName()} (${entry.getPrice()} $)</option>
                 <br/>
             </c:forEach>
         </select>
         <p>
-            <button type="submit" name="button" value="add">Add Item</button>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;            &nbsp;
+            <button type="submit" name="button" value="add">Add Item</button>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp;
             <button type="submit" name="button" value="submit">Submit</button>
         </p>
     </form>
 </div>
 </body>
 </html>
+
+
