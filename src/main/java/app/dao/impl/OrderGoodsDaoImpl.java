@@ -2,56 +2,54 @@ package app.dao.impl;
 
 import app.dao.OrderGoodsDao;
 import app.entity.OrderGoods;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Repository;
+
+import javax.inject.Inject;
 import java.util.List;
-import javax.sql.DataSource;
 
+@Repository
+@Lazy
 public class OrderGoodsDaoImpl implements OrderGoodsDao {
-    private static final String SELECT_ORDER_GOOD_BY_ORDER_ID_SQL_STATEMENT = "SELECT * FROM OrderGoods WHERE orderId LIKE ?";
-    private static final String INSERT_ORDER_GOOD_SQL_STATEMENT = "INSERT INTO OrderGoods (orderId, goodId) VALUES (?,?)";
+    private static final String SELECT_ORDER_GOOD_BY_ORDER_ID = "from OrderGoods where orderId = :orderId";
 
-    private final DataSource dataSource;
+    private SessionFactory factory;
 
-    public OrderGoodsDaoImpl(DataSource dataSource) {
-        this.dataSource = dataSource;
+    @Inject
+    public OrderGoodsDaoImpl(SessionFactory factory) {
+        this.factory = factory;
     }
 
     /**
      * Return list contains all {@link OrderGoods} of the transferred orderId
      * @return the list with all {@link OrderGoods} of this order
-     * @throws SQLException an exception that provides information on a database access
-     * error or other errors.
      */
     @Override
-    public List<OrderGoods> getByOrderId(Long orderId) throws SQLException {
-        List<OrderGoods> list = new ArrayList<>();
-        try (PreparedStatement st = dataSource.getConnection().prepareStatement(SELECT_ORDER_GOOD_BY_ORDER_ID_SQL_STATEMENT)){
-            st.setLong(1, orderId);
-            ResultSet rs = st.executeQuery();
-            while (rs.next()) {
-                list.add(new OrderGoods(rs.getLong("id"), rs.getLong("orderId"), rs.getLong("goodId")));
-            }
+    public List<OrderGoods> getByOrderId(Long orderId) {
+        List<OrderGoods> orderGoods;
+        try(Session session = factory.openSession()) {
+            orderGoods = session.createQuery(SELECT_ORDER_GOOD_BY_ORDER_ID).setParameter("orderId", orderId).getResultList();
         }
-        return list;
+        return orderGoods;
     }
 
     /**
      * Add to OrderGoods table units with transferred goodId and orderId
      * @param orderId the order id
      * @param goodId the good id
-     * @throws SQLException an exception that provides information on a database access
-     *      * error or other errors.
      */
     @Override
-    public void addToOrderGood(Long orderId, Long goodId) throws SQLException {
-        try (PreparedStatement st = dataSource.getConnection().prepareStatement(INSERT_ORDER_GOOD_SQL_STATEMENT)) {
-            st.setLong(1, orderId);
-            st.setLong(2, goodId);
-            st.executeUpdate();
+    public boolean addToOrderGood(Long orderId, Long goodId) {
+        boolean isUpdated;
+        try(Session session = factory.openSession()) {
+            OrderGoods orderGood = new OrderGoods();
+            orderGood.setOrderId(orderId);
+            orderGood.setGoodId(goodId);
+            session.save(orderGood);
+            isUpdated = true;
         }
+        return isUpdated;
     }
 }

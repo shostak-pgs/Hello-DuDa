@@ -1,39 +1,50 @@
 package app.service.impl;
 
-import app.dao.GoodDao;
 import app.dao.OrderGoodsDao;
+import app.dao.impl.OrderGoodsDaoImpl;
 import app.entity.Good;
 import app.entity.OrderGoods;
-import app.service.OrderGoodsService;
 import app.utils.GoodsUtil;
-import java.sql.SQLException;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ModelAttribute;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OrderGoodsServiceImpl implements OrderGoodsService {
-    private final OrderGoodsDao orderGoodsDao;
-    private final GoodDao goodDao;
+@Service
+@Lazy
+public class OrderGoodsServiceImpl {
+    public static final String PRINT_GOODS = "goodsList";
+    public static final String PRICE = "price";
 
-    public OrderGoodsServiceImpl(OrderGoodsDao orderGoodsDao, GoodDao goodDao) {
+    private OrderGoodsDao orderGoodsDao;
+    private GoodsServiceImpl goodService;
+
+    /**
+     * @param orderGoodsDao the {@link OrderGoodsDaoImpl}
+     * @param goodService the {@link OrderGoodsDaoImpl}
+     */
+    @Inject
+    public void setDao(OrderGoodsDao orderGoodsDao, GoodsServiceImpl goodService) {
         this.orderGoodsDao = orderGoodsDao;
-        this.goodDao = goodDao;
+        this.goodService = goodService;
     }
 
     /**
-     * Added product by name to the OrderGoods db table
-     * @param name name of product to be added
-     * @param orderId id of order in which the product included
+     * Returns the list contains goods in order. Sampling by transferred id
+     * @param orderId id of order for list building
+     * @return the list
      */
-    @Override
-    public void add(String name, Long orderId) {
-        try {
-            Good good = goodDao.getGood(GoodsUtil.getName(name));
-            orderGoodsDao.addToOrderGood(orderId, good.getId());
-        } catch (SQLException e) {
-            System.out.println("Exception with basket. Try again later");
-        }
+    @Transactional
+    public List<Good> getGoods(Long orderId){
+        List<OrderGoods> inCurrentOrder = orderGoodsDao.getByOrderId(orderId);
+        return getGoodsInCurrentOrder(inCurrentOrder);
     }
 
     /**
@@ -41,12 +52,11 @@ public class OrderGoodsServiceImpl implements OrderGoodsService {
      * @param orderId id of order for map building
      * @return the map
      */
-    @Override
+    @Transactional
     public Map<String, Integer> getOrderedGoods(Long orderId) {
         Map<String, Integer> map = new HashMap<>();
-        List<Good> orderedGoods = getGoods(orderId);
-        for(Good good : orderedGoods) {
-            String item = (good.getName() + " (" + good.getPrice() + " $)");
+        for(Good good : getGoods(orderId)) {
+            String item = good.getName() + " (" + good.getPrice() + " $)";
             int value = 1;
             if (map.containsKey(item)) {
                 value = map.get(item) + 1;
@@ -58,21 +68,52 @@ public class OrderGoodsServiceImpl implements OrderGoodsService {
     }
 
     /**
-     * Returns the list contains goods in order. Sampling by transferred id
-     * @param orderId id of order for list building
+     * Added product by name to the OrderGoods db table
+     * @param good product to be added
+     * @param orderId id of order in which the product included
+     */
+    @Transactional
+    public boolean add(Good good, Long orderId){
+        orderGoodsDao.addToOrderGood(orderId, good.getId());
+        return true;
+    }
+
+    /**
+     * Returns the list contains goods in order. Sampling by transferred OrderGoods list
+     * @param goodsInCurrentOrder the OrderGoods list for good list creation
      * @return the list
      */
-  public List<Good> getGoods(Long orderId) {
-      List<Good> orderedGoods = new ArrayList<>();
-      try {
-          List<OrderGoods> inCurrentOrder = orderGoodsDao.getByOrderId(orderId);
+    protected List<Good> getGoodsInCurrentOrder(List<OrderGoods> goodsInCurrentOrder){
+        List<Good> orderedGoods = new ArrayList<>();
+        for (OrderGoods current : goodsInCurrentOrder) {
+            orderedGoods.add(goodService.getGood(current.getGoodId()));
+        }
+        return orderedGoods;
+    }
 
-          for (OrderGoods current : inCurrentOrder) {
-              orderedGoods.add(goodDao.getGood(current.getGoodId()));
-          }
-      } catch (SQLException e) {
-          e.printStackTrace();
-      }
-      return orderedGoods;
-  }
+    /**
+     * Create map with parameters for print check
+     * @param basket the map contains goods
+     * @return the map with parameters
+     */
+    @ModelAttribute("goods")
+    public List<String> createPresentationParams(@NotNull Map<String, Integer> basket){
+        List<String>params = new ArrayList<>();
+        int i = 1;
+        for (Map.Entry<String, Integer> pair : basket.entrySet()) {
+            params.add(i + ") "+ pair.getKey() + " x " + pair.getValue());
+            i += 1;
+        }
+        return params;
+    }
+
+    /**
+     * Counts total price of order by id
+     * @param orderId the order id
+     * @return the price
+     */
+    public String countPrice(long orderId) {
+        double orderPrice = GoodsUtil.countTotalPrice(getGoods(orderId));
+        return String.format("%.1f", orderPrice);
+    }
 }

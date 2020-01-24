@@ -1,19 +1,41 @@
 package app.entity;
 
+import javax.persistence.*;
 import java.util.Objects;
 
 /**
  * This class encapsulate data for user representation
  */
+@Entity
+@Table(name = "USERS")
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private long id;
+
+    @Column(name = "userName")
     private String login;
+
+    @Column(name = "password")
     private String password;
 
-    public User(long id, String login, String password) {
+    @Column(name = "role")
+   // @Enumerated(EnumType.STRING)
+    private String role;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "id", referencedColumnName = "userId")
+    private Order order;
+
+    public User(){}
+
+    public User(final long id, final String login, final String password, final String role, Order order) {
         this.id = id;
         this.login = login;
         this.password = password;
+        this.role = role;
+        this.order = order;
     }
 
     public long getId() {
@@ -40,6 +62,23 @@ public class User {
         this.password = password;
     }
 
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public void setOrder(Order order) {
+        this.order = order;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -47,12 +86,14 @@ public class User {
         User user = (User) o;
         return id == user.id &&
                 login.equals(user.login) &&
-                password.equals(user.password);
+                password.equals(user.password) &&
+                order.equals(user.order) &&
+                role.equals(user.role);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, login, password);
+        return Objects.hash(id, login, password, role, order);
     }
 
     @Override
@@ -60,7 +101,8 @@ public class User {
         return "User{" +
                 "id=" + id +
                 ", login='" + login + '\'' +
-                ", password='" + password + '\'' +
+                ", password=*****'"  + '\'' +
+                ", role=" + role +
                 '}';
     }
 }

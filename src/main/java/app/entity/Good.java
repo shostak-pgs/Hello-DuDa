@@ -1,14 +1,26 @@
 package app.entity;
 
+import javax.persistence.*;
 import java.util.Objects;
 
 /**
  * Class represents a bin to describe a product
  */
+@Entity
+@Table(name = "GOODS")
 public class Good {
+    @Id
+    @GeneratedValue
+    @Column(name = "id")
     private long id;
+
+    @Column(name = "name")
     private String name;
+
+    @Column(name = "price")
     private double price;
+
+    public Good(){}
 
     public Good(long id, String name, double price) {
         this.id = id;

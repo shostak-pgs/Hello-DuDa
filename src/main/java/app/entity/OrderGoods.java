@@ -1,14 +1,26 @@
 package app.entity;
 
+import javax.persistence.*;
 import java.util.Objects;
 
 /**
  * Class represents a bin to describe a order-good connection
  */
+@Entity
+@Table(name = "ORDERGOODS")
 public class OrderGoods {
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @Column(name = "orderId")
     private long orderId;
+
+    @Column(name = "goodId")
     private long goodId;
+
+    public OrderGoods(){}
 
     public OrderGoods(long id, long orderId, long goodId) {
         this.id = id;

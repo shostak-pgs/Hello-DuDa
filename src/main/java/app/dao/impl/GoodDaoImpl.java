@@ -2,42 +2,41 @@ package app.dao.impl;
 
 import app.dao.GoodDao;
 import app.entity.Good;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Repository;
+
+import javax.inject.Inject;
 import java.util.List;
-import javax.sql.DataSource;
+import java.util.Optional;
 
+@Repository
+@Lazy
 public class GoodDaoImpl implements GoodDao {
-    private static final String SELECT_GOOD_SQL_STATEMENT = "SELECT * FROM Goods WHERE name LIKE ?";
-    private static final String SELECT_GOOD_BY_ID_SQL_STATEMENT = "SELECT * FROM Goods WHERE id LIKE ?";
-    private static final String SELECT_ALL_GOODS_SQL_STATEMENT = "SELECT * FROM Goods";
-    private static final String DELETE_GOOD_SQL_STATEMENT = "DELETE FROM Goods WHERE name LIKE ?";
+    private static final String ID_COLUMN = "id";
+    private static final String NAME_COLUMN = "name";
+    private static final String SELECT_GOOD_SQL_STATEMENT = "from Good where name = :name";
+    private static final String SELECT_GOOD_BY_ID_SQL_STATEMENT = "from Good where id = :id";
+    private static final String SELECT_ALL_GOODS = "from Good";
 
-    private final DataSource dataSource;
+    private SessionFactory factory;
 
-    public GoodDaoImpl(DataSource dataSource) {
-        this.dataSource = dataSource;
+    @Inject
+    public GoodDaoImpl(SessionFactory factory) {
+        this.factory = factory;
     }
 
     /**
      * Returns the good by the transferred name
      * @param name good's name
      * @return the {@link Good}
-     * @throws SQLException an exception that provides information on a database access
-     * error or other errors.
      */
     @Override
-    public Good getGood(String name) throws SQLException {
-        Good good = null;
-        try (PreparedStatement st = dataSource.getConnection().prepareStatement(SELECT_GOOD_SQL_STATEMENT)) {
-            st.setString(1, name);
-            ResultSet rs = st.executeQuery();
-            while (rs.next()) {
-                good = new Good(rs.getLong("id"), rs.getString("name"), rs.getDouble("price"));
-            }
+    public Optional<Good> getGood(String name) {
+        Optional<Good> good;
+        try (Session session = factory.openSession()) {
+            good = Optional.ofNullable((Good) session.createQuery(SELECT_GOOD_SQL_STATEMENT).setParameter(NAME_COLUMN, name).uniqueResult());
         }
         return good;
     }
@@ -46,18 +45,12 @@ public class GoodDaoImpl implements GoodDao {
      * Returns the good by the transferred id
      * @param goodId good's id
      * @return the {@link Good}
-     * @throws SQLException an exception that provides information on a database access
-     * error or other errors.
      */
     @Override
-    public Good getGood(Long goodId) throws SQLException {
-        Good good = null;
-        try (PreparedStatement st = dataSource.getConnection().prepareStatement(SELECT_GOOD_BY_ID_SQL_STATEMENT)) {
-            st.setLong(1, goodId);
-            ResultSet rs = st.executeQuery();
-            while (rs.next()) {
-                good = new Good(rs.getLong("id"), rs.getString("name"), rs.getDouble("price"));
-            }
+    public Optional<Good> getGood(Long goodId) {
+        Optional<Good> good;
+        try (Session session = factory.openSession()) {
+            good = Optional.ofNullable((Good) session.createQuery(SELECT_GOOD_BY_ID_SQL_STATEMENT).setParameter(ID_COLUMN, goodId).uniqueResult());
         }
         return good;
     }
@@ -65,19 +58,13 @@ public class GoodDaoImpl implements GoodDao {
     /**
      * Return list contains all Goods in base
      * @return the list
-     * @throws SQLException an exception that provides information on a database access
-     * error or other errors.
      */
     @Override
-    public List<Good> getAllGoods() throws SQLException {
-        List<Good> goodsList = new ArrayList<>();
-        try (PreparedStatement st = dataSource.getConnection().prepareStatement(SELECT_ALL_GOODS_SQL_STATEMENT);
-             ResultSet rs = st.executeQuery()) {
-
-            while (rs.next()) {
-                goodsList.add(new Good(rs.getLong("id"), rs.getString("name"), rs.getDouble("price")));
-            }
+    public List<Good> getAllGoods() {
+        List<Good> goods;
+        try (Session session = factory.openSession()) {
+            goods = session.createQuery(SELECT_ALL_GOODS).getResultList();
         }
-        return goodsList;
+        return goods;
     }
 }

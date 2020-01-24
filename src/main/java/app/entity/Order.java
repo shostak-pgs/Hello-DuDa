@@ -1,14 +1,27 @@
 package app.entity;
 
+import javax.persistence.*;
 import java.util.Objects;
 
 /**
  * Class represents a bin to describe an order
  */
+@Entity
+@Table(name = "ORDERS")
 public class Order {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private long id;
+
+    @Column(name = "userId")
     private long userId;
+
+    @Column(name = "totalPrice")
     private double totalPrice;
+
+    public Order(){}
 
     public Order(long id, long userId, double totalPrice) {
         this.id = id;
